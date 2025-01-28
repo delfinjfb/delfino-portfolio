@@ -1,0 +1,30 @@
+# Build and output directories
+.next/
+dist/
+build/
+out/
+
+# Node modules
+node_modules/
+
+# Static assets
+public/
+static/
+
+# Configuration and environment files
+*.env
+*.lock
+
+# Coverage and report directories
+coverage/
+reports/
+
+# Temporary and IDE-specific files
+.cache/
+.idea/
+.vscode/
+.DS_Store
+
+# Generated code
+graphql/
+types/
