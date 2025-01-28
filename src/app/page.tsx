@@ -1,4 +1,5 @@
 import { fetchPortfolioEntries } from '@/utils/contentful';
+import Image from 'next/image';
 
 export default async function HomePage() {
   const portfolioEntries = await fetchPortfolioEntries();
@@ -19,19 +20,22 @@ export default async function HomePage() {
         {portfolioEntries.map((entry, index) => (
           <div key={index} className="bg-gray-900 p-4 rounded-lg shadow-lg">
             {entry.imageUrl && (
-              <img
+              <Image
                 src={`https:${entry.imageUrl}`}
-                alt={entry.siteTitle}
-                className="w-full h-48 object-cover rounded-lg"
+                alt={entry.siteTitle || 'Portfolio Image'}
+                width={400}
+                height={300}
+                className="rounded-lg"
               />
             )}
             <h2 className="text-xl font-bold text-white mt-2">
               {entry.siteTitle}
             </h2>
-            <p className="text-gray-300 mt-2">{entry.description}</p>
+            <p className="text-gray-300 mt-2">{String(entry.description)}</p>
             <div className="mt-2">
               {entry.tags &&
-                entry.tags.split(' ').map((tag: string, idx: number) => (
+                typeof entry.tags === 'string' &&
+                entry.tags.split(' ').map((tag, idx) => (
                   <span
                     key={idx}
                     className="bg-blue-500 text-white text-sm rounded px-2 py-1 mr-2"
