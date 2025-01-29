@@ -1,48 +1,41 @@
-import { createClient, EntrySkeletonType } from 'contentful';
+import { createClient, EntrySkeletonType, Asset } from 'contentful';
 
-// Define fields structure
-interface PortfolioEntryFields {
+// Define the expected structure for a portfolio entry
+export type PortfolioEntry = {
   siteTitle: string;
   description: string;
-  image?: {
-    fields: {
-      file: {
-        url: string;
-      };
-    };
-  };
-  tags?: string;
-}
+  imageUrl: string | null;
+  tags: string[];
+};
 
-// Define EntrySkeletonType
-type PortfolioEntrySkeleton = EntrySkeletonType<PortfolioEntryFields>;
-
-// Create Contentful client
-const contentfulClient = createClient({
-  space: process.env.NEXT_PUBLIC_CONTENTFUL_SPACE_ID || '',
-  accessToken: process.env.NEXT_PUBLIC_CONTENTFUL_ACCESS_TOKEN || '',
+const client = createClient({
+  space: process.env.NEXT_PUBLIC_CONTENTFUL_SPACE_ID as string,
+  accessToken: process.env.NEXT_PUBLIC_CONTENTFUL_ACCESS_TOKEN as string,
 });
 
-// Fetch portfolio entries
-export async function fetchPortfolioEntries(locale: string = 'en-US') {
-  const query = {
+export async function fetchPortfolioEntries(): Promise<PortfolioEntry[]> {
+  const response = await client.getEntries<EntrySkeletonType>({
     content_type: 'delfinoPortfolio',
-    locale,
-  };
+  });
 
-  try {
-    const response =
-      await contentfulClient.getEntries<PortfolioEntrySkeleton>(query);
+  return response.items.map((item) => {
+    const fields = item.fields as Record<string, unknown>; // Ensure fields is an object
 
-    // Map response to transform data
-    return response.items.map((item) => ({
-      siteTitle: item.fields.siteTitle || '',
-      description: item.fields.description || '',
-      imageUrl: item.fields.image?.fields?.file?.url,
-      tags: item.fields.tags || '',
-    }));
-  } catch (error) {
-    console.error('Error fetching portfolio entries:', error);
-    return [];
-  }
+    return {
+      siteTitle: typeof fields.siteTitle === 'string' ? fields.siteTitle : '',
+      description:
+        typeof fields.description === 'string' ? fields.description : '',
+      imageUrl:
+        fields.image &&
+        (fields.image as Asset)?.fields?.file?.url &&
+        (fields.image as Asset).fields?.file?.url
+          ? `https:${(fields.image as Asset)?.fields?.file?.url}`
+          : null,
+      tags: Array.isArray(fields.tags)
+        ? fields.tags.map((tag) => String(tag))
+        : typeof fields.tags === 'string'
+          ? fields.tags.split(',')
+          : [],
+    };
+  });
 }

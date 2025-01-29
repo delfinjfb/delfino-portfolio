@@ -3,9 +3,12 @@
 @tailwind utilities;
 
 /* Custom global styles */
+/* Example global styles */
 body {
-  @apply bg-white text-gray-900 dark:bg-gray-900 dark:text-gray-100;
-  font-family: 'Inter', sans-serif;
+  font-family: Arial, sans-serif;
+  background-color: #f4f4f4;
+  margin: 0;
+  padding: 0;
 }
 
 a {
